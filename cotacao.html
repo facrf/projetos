@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotação do Dólar em Tempo Real</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #cotacao-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #28a745; /* Verde  */
+        }
+        .info {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Cotação do Dólar Comercial (USD/BRL)</h1>
+
+    <div id="cotacao-display">
+        Carregando...
+    </div>
+
+    <div class="info">
+        <p>Valor de **Venda** em R$</p>
+        <p>Última atualização: <span id="ultima-atualizacao">...</span></p>
+        <p>Atualização programada a cada 60 segundos.</p>
+    </div>
+
+    <script>
+        // 1. URL da API para o Dólar Americano (USD) para Real (BRL)
+        const API_URL = 'https://economia.awesomeapi.com.br/json/last/USD-BRL';
+
+        // 2. Função para buscar e atualizar a cotação
+        function atualizarCotacao() {
+            fetch(API_URL)
+                .then(response => response.json()) // Converte a resposta para JSON
+                .then(data => {
+                    // Os dados da cotação USD para BRL estão dentro de 'USDBRL'
+                    const dolarData = data.USDBRL;
+
+                    // O valor de VENDA é o mais comum para exibir
+                    const valorVenda = parseFloat(dolarData.bid); // 'bid' é o preço de compra para a corretora (venda para o cliente)
+                    
+                    // Formata o valor para o padrão BRL (R$ X.XXX,XX)
+                    const cotacaoFormatada = valorVenda.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    });
+
+                    // Cria a string da hora da última busca
+                    const horaAtual = new Date().toLocaleTimeString('pt-BR');
+
+                    // 3. Atualiza os elementos HTML
+                    document.getElementById('cotacao-display').innerText = cotacaoFormatada;
+                    document.getElementById('ultima-atualizacao').innerText = horaAtual;
+
+                    console.log(`Cotação atualizada: ${cotacaoFormatada} às ${horaAtual}`);
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar a cotação:', error);
+                    document.getElementById('cotacao-display').innerText = 'Erro ao carregar';
+                    document.getElementById('ultima-atualizacao').innerText = new Date().toLocaleTimeString('pt-BR');
+                });
+        }
+
+        // 4. Executa a função uma vez ao carregar a página
+        atualizarCotacao();
+
+        // 5. Agenda a execução da função a cada 60 segundos (60000 milissegundos)
+        setInterval(atualizarCotacao, 60000); 
+
+    </script>
+
+</body>
+</html>
