@@ -1,114 +1,164 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fabiano Cesar | Desenvolvedor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-50 text-gray-800 font-sans">
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotações Crypto em Tempo Real (CoinGecko)</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1E293B"> 
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0F172A; /* Azul Escuro */
+            color: #E2E8F0; /* Cinza Claro */
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
 
-    <!-- Header -->
-    <header class="bg-white shadow-md">
-      <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">Fabiano Cesar</h1>
-        <nav class="space-x-4">
-          <a href="#sobre" class="hover:text-blue-600">Sobre</a>
-          <a href="#projetos" class="hover:text-blue-600">Projetos</a>
-          <a href="#contato" class="hover:text-blue-600">Contato</a>
-        </nav>
-      </div>
-    </header>
+        h1 {
+            color: #6366F1; /* Roxo */
+            margin-bottom: 5px;
+        }
 
-    <!-- Hero -->
-    <section class="text-center py-20 px-6 bg-blue-100">
-      <h2 class="text-4xl font-bold mb-4">Desenvolvedor Java e Kotlin</h2>
-      <p class="text-lg max-w-xl mx-auto mb-6">
-        Crio soluções limpas, escaláveis e funcionais com foco em performance, qualidade e valor real ao cliente.
-      </p>
-      <a href="#contato" class="bg-blue-600 text-white px-6 py-3 rounded-full shadow hover:bg-blue-700 transition">
-        Fale comigo
-      </a>
-    </section>
+        #lastUpdated {
+            display: block;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #94A3B8;
+        }
 
-    <!-- Sobre -->
-    <section id="sobre" class="py-16 px-6 max-w-3xl mx-auto text-center">
-      <h3 class="text-2xl font-semibold mb-4">Quem sou eu?</h3>
-      <p class="text-gray-700">
-        Sou desenvolvedor com sólida experiência em Java e Kotlin, apaixonado por criar soluções limpas, escaláveis e funcionais. Tenho histórico em desenvolvimento de APIs, integração de sistemas e melhoria de performance em ambientes críticos.
-      </p>
-      <p class="mt-4 text-gray-700">
-        Além da técnica, prezo pelo compromisso, pela entrega com qualidade e pelo respeito ao cliente e à equipe. Já atuei em projetos de diferentes portes, sempre buscando aplicar boas práticas, como SOLID, Clean Architecture e testes automatizados.
-      </p>
-    </section>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1E293B;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
 
-    <!-- Projetos -->
-    <section id="projetos" class="bg-white py-16 px-6">
-      <div class="max-w-6xl mx-auto text-center">
-        <h3 class="text-2xl font-semibold mb-10">Projetos</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-          <!-- Projeto 1 -->
-          <div class="bg-gray-100 p-6 rounded-xl shadow hover:shadow-lg transition">
-            <h4 class="font-bold mb-2">Software de Colônia de Pescadores</h4>
-            <p class="text-gray-700 text-sm mb-2">
-              Sistema para administração de associados e integração com o MAPA (Ministério da Agricultura e Pecuária).
-            </p>
-            <p class="text-xs text-gray-500">Tecnologias: Delphi, Firebird</p>
-          </div>
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+            text-align: left;
+        }
 
-          <!-- Projeto 2 -->
-          <div class="bg-gray-100 p-6 rounded-xl shadow hover:shadow-lg transition">
-            <h4 class="font-bold mb-2">App para Sindicatos e Colônias</h4>
-            <p class="text-gray-700 text-sm mb-2">
-              Gerencia associados, anuidades, documentação junto ao MAPA e alertas automáticos.
-            </p>
-            <p class="text-xs text-gray-500">Tecnologias: Java, Kotlin, SQLite</p>
-          </div>
+        th {
+            background-color: #334155;
+            color: #CBD5E1;
+            font-weight: bold;
+        }
 
-          <!-- Projeto 3 -->
-          <div class="bg-gray-100 p-6 rounded-xl shadow hover:shadow-lg transition">
-            <h4 class="font-bold mb-2">Amigo do Pescador</h4>
-            <p class="text-gray-700 text-sm mb-2">
-              App informativo sobre marés, fases da lua e períodos de defeso no Brasil.
-            </p>
-            <p class="text-xs text-gray-500">Tecnologias: Android, Java, Kotlin, SQLite</p>
-          </div>
+        .valor {
+            text-align: right;
+            font-weight: 600;
+            color: #A7F3D0; /* Verde Claro */
+        }
 
-        </div>
-      </div>
-    </section>
+        /* Botão de Instalação (PWA) */
+        #installButton {
+            background-color: #FBBF24; /* Amarelo */
+            color: #1F2937;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 30px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            /* O botão deve estar inicialmente oculto, o JS o mostra se for elegível */
+            display: none; 
+            width: 100%;
+            transition: background-color 0.3s;
+        }
 
-    <!-- Contato -->
-    <section id="contato" class="py-16 px-6 bg-blue-50 text-center">
-      <div class="max-w-xl mx-auto">
-        <h3 class="text-2xl font-semibold mb-4">Entre em contato</h3>
-        <p class="mb-6 text-gray-700">
-          Está com um projeto em mente ou quer conversar sobre tecnologia? Me chame:
-        </p>
-        <div class="space-y-2">
-          <p><strong>Email:</strong> <a href="mailto:contato@fabianocesar.com" class="text-blue-600 hover:underline">contato@fabianocesar.com</a></p>
-          <p><strong>GitHub:</strong> <a href="https://github.com/users/facrf" target="_blank" class="text-blue-600 hover:underline">github.com/users/facrf</a></p>
-        </div>
-      </div>
-    </section>
+        #installButton:hover {
+            background-color: #F59E0B;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cotações Crypto</h1>
+        <span id="lastUpdated">Carregando...</span>
 
-    <!-- Footer -->
-    <footer class="text-center py-6 text-sm text-gray-500 bg-white">
-      © 2025 Fabiano Cesar. Todos os direitos reservados.
+        <table>
+            <thead>
+                <tr>
+                    <th>Moeda</th>
+                    <th style="text-align: right;">Cotação em BRL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Bitcoin (BTC)</td><td id="BTC-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Ethereum (ETH)</td><td id="ETH-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Solana (SOL)</td><td id="SOL-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Ripple (XRP)</td><td id="XRP-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Cardano (ADA)</td><td id="ADA-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Stellar (XLM)</td><td id="XLM-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Tether (USDT)</td><td id="USDT-BRL" class="valor">Buscando...</td></tr>
+            </tbody>
+        </table>
+        
+        <button id="installButton">
+            Instalar como App
+        </button>
+    </div>
 
-    // temporário
-    <a href="cotacao.html">
-    <button>
-        Ver Cotação do Dólar
-    </button>
-    </a>
-      
-    </footer>
+    <script>
+        // --- Configuração da API CoinGecko ---
+        
+        // IDs das moedas conforme a CoinGecko
+        const IDS_CRIPTO = 'tether,bitcoin,solana,ethereum,ripple,cardano,stellar';
+        const MOEDA_CONVERSAO = 'brl';
 
+        const API_COINGECKO_URL = `https://api.coingecko.com/api/v3/simple/price?ids=${IDS_CRIPTO}&vs_currencies=${MOEDA_CONVERSAO}`;
 
+        const formatterBRL = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2
+        });
 
-  </body>
-</html>
+        /**
+         * Busca cotações na API CoinGecko e atualiza o DOM.
+         */
+        async function buscarCotacoes() {
+            try {
+                const response = await fetch(API_COINGECKO_URL);
 
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status} - CoinGecko.`);
+                }
+                
+                const data = await response.json();
+                
+                // Mapeamento dos IDs da API para os IDs do HTML
+                const mapaMoedas = {
+                    'tether': 'USDT-BRL',
+                    'bitcoin': 'BTC-BRL',
+                    'solana': 'SOL-BRL',
+                    'ethereum': 'ETH-BRL',
+                    'ripple': 'XRP-BRL',
+                    'cardano': 'ADA-BRL',
+                    'stellar': 'XLM-BRL'
+                };
 
+                // Atualiza os valores na tabela
+                for (const [id_moeda, id_html] of Object.entries(mapaMoedas)) {
+                    const elementoValor = document.getElementById(id_html);
+                    
+                    if (data[id_moeda] && elementoValor) {
+                        // O valor já vem formatado para BRL
+                        const precoBRL = data[id_moeda][MOEDA_CONVERSAO];
+                        elementoValor.textContent = formatterBRL.format(precoBRL);
+                    }
+                }
+
+                document.getElementById('lastUpdated').textContent = `Última atualização: ${new Date().toLocaleTimeString
