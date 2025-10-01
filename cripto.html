@@ -72,9 +72,7 @@
             border-radius: 5px;
             font-size: 1.1em;
             cursor: pointer;
-            /* Corrigido: o botão deve ser 'block' para aparecer, 
-               mas o JavaScript o esconde se a instalação não for possível. */
-            display: block; 
+            display: none; /* Inicia oculto, só o JS o torna visível se elegível */
             width: 100%;
             transition: background-color 0.3s;
         }
@@ -97,163 +95,135 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Bitcoin (BTC)</td>
-                    <td id="BTC-BRL" class="valor">Buscando...</td>
-                </tr>
-                <tr>
-                    <td>Ethereum (ETH)</td>
-                    <td id="ETH-BRL" class="valor">Buscando...</td>
-                </tr>
-                <tr>
-                    <td>Solana (SOL)</td>
-                    <td id="SOL-BRL" class="valor">Buscando...</td>
-                </tr>
-                <tr>
-                    <td>Ripple (XRP)</td>
-                    <td id="XRP-BRL" class="valor">Buscando...</td>
-                </tr>
-                 <tr>
-                    <td>Cardano (ADA)</td>
-                    <td id="ADA-BRL" class="valor">Buscando...</td>
-                </tr>
-                 <tr>
-                    <td>Stellar (XLM)</td>
-                    <td id="XLM-BRL" class="valor">Buscando...</td>
-                </tr>
-                <tr>
-                    <td>Tether (USDT)</td>
-                    <td id="USDT-BRL" class="valor">Buscando...</td>
-                </tr>
+                <tr><td>Bitcoin (BTC)</td><td id="BTC-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Ethereum (ETH)</td><td id="ETH-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Solana (SOL)</td><td id="SOL-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Ripple (XRP)</td><td id="XRP-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Cardano (ADA)</td><td id="ADA-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Stellar (XLM)</td><td id="XLM-BRL" class="valor">Buscando...</td></tr>
+                <tr><td>Tether (USDT)</td><td id="USDT-BRL" class="valor">Buscando...</td></tr>
             </tbody>
         </table>
         
-        <button id="installButton" style="display: none;">
+        <button id="installButton">
             Instalar como App
         </button>
     </div>
 
     <script>
+        // --- Configuração da API e Moedas ---
+        const PARES_CRIPTO = [
+            'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'XLMUSDT'
+        ];
+        const PAR_CONVERSAO = 'BRLUSDT'; 
+        const API_TICKER_BINANCE_BASE = 'https://api.binance.com/api/v3/ticker/24hr';
 
-// --- Configuração da API e Moedas ---
-const PARES_CRIPTO = [
-    'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'XLMUSDT'
-];
-const PAR_CONVERSAO = 'BRLUSDT'; 
-// Endpoint para buscar o preço de múltiplos símbolos
-const API_TICKER_BINANCE_BASE = 'https://api.binance.com/api/v3/ticker/24hr';
+        const formatterBRL = new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2
+        });
 
-const formatterBRL = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-    minimumFractionDigits: 2
-});
+        let cotacaoBRL_por_USDT = 0;
 
-let cotacaoBRL_por_USDT = 0;
-
-/**
- * Busca cotações na API da Binance, converte para BRL e atualiza o DOM.
- */
-async function buscarCotacoesBinance() {
-    try {
-        // 1. CONSTRUÇÃO DA URL: A forma mais segura de passar os símbolos para a Binance
-        // Todos os símbolos necessários (criptos + conversão)
-        const todosSimbolos = [...PARES_CRIPTO, PAR_CONVERSAO];
-        // Cria a string de símbolos no formato exigido pela Binance: ["BTCUSDT","ETHUSDT",...]
-        const simbolosQuery = JSON.stringify(todosSimbolos);
-        
-        // Monta a URL completa
-        const url = `${API_TICKER_BINANCE_BASE}?symbols=${simbolosQuery}`;
-        
-        console.log("Tentando acessar URL:", url); // Útil para debug
-
-        const response = await fetch(url);
-        
-        // Verifica se a resposta HTTP foi bem-sucedida (código 200)
-        if (!response.ok) {
-            // Se houver erro HTTP (ex: 404, 403), lança o erro.
-            throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        
-        // Se a API retornar um objeto de erro em vez de um array de dados
-        if (Array.isArray(data) === false) {
-             throw new Error(`Dados da API inválidos. Resposta: ${JSON.stringify(data)}`);
-        }
-
-        // 2. Encontra a taxa de conversão (quantos BRL valem 1 USDT)
-        const parBRLUSDT = data.find(item => item.symbol === PAR_CONVERSAO);
-        
-        if (parBRLUSDT) {
-            // O preço é 1 / (preço de 1 BRL em USDT)
-            cotacaoBRL_por_USDT = 1 / parseFloat(parBRLUSDT.lastPrice);
-        } else {
-            cotacaoBRL_por_USDT = 5.00; 
-            console.warn("Falha ao obter cotação BRL/USDT. Usando 5.00 como fallback.");
-        }
-        
-        // 3. Atualiza os valores na tela
-        data.forEach(item => {
-            if (PARES_CRIPTO.includes(item.symbol)) {
-                const simbolo = item.symbol.replace('USDT', ''); 
-                const precoUSD = parseFloat(item.lastPrice);
+        /**
+         * Busca cotações na API da Binance, converte para BRL e atualiza o DOM.
+         * A sintaxe de URL foi ajustada para máxima compatibilidade com a Binance.
+         */
+        async function buscarCotacoesBinance() {
+            try {
+                // 1. CONSTRUÇÃO DA URL (Formato seguro para Binance)
+                const todosSimbolos = [...PARES_CRIPTO, PAR_CONVERSAO];
+                const simbolosQuery = JSON.stringify(todosSimbolos);
+                const url = `${API_TICKER_BINANCE_BASE}?symbols=${simbolosQuery}`;
                 
-                const precoBRL = precoUSD * cotacaoBRL_por_USDT;
-
-                const elementoId = `${simbolo}-BRL`;
-                const elementoValor = document.getElementById(elementoId);
+                const response = await fetch(url);
                 
-                if (elementoValor) {
-                    elementoValor.textContent = formatterBRL.format(precoBRL);
+                // 2. VERIFICAÇÃO DE ERRO HTTP
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
                 }
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data) === false) {
+                     throw new Error(`Dados da API inválidos. Resposta: ${JSON.stringify(data)}`);
+                }
+
+                // 3. ENCONTRA TAXA DE CONVERSÃO (USDT para BRL)
+                const parBRLUSDT = data.find(item => item.symbol === PAR_CONVERSAO);
+                
+                if (parBRLUSDT) {
+                    cotacaoBRL_por_USDT = 1 / parseFloat(parBRLUSDT.lastPrice);
+                } else {
+                    cotacaoBRL_por_USDT = 5.00; 
+                    console.warn("Falha ao obter cotação BRL/USDT. Usando 5.00 como fallback.");
+                }
+                
+                // 4. ATUALIZA CRIPTOMOEDAS
+                data.forEach(item => {
+                    if (PARES_CRIPTO.includes(item.symbol)) {
+                        const simbolo = item.symbol.replace('USDT', ''); 
+                        const precoUSD = parseFloat(item.lastPrice);
+                        const precoBRL = precoUSD * cotacaoBRL_por_USDT;
+
+                        const elementoId = `${simbolo}-BRL`;
+                        const elementoValor = document.getElementById(elementoId);
+                        
+                        if (elementoValor) {
+                            elementoValor.textContent = formatterBRL.format(precoBRL);
+                        }
+                    }
+                });
+
+                // 5. ATUALIZA USDT (Preço do USDT em BRL)
+                const elementoUSDT = document.getElementById('USDT-BRL');
+                if(elementoUSDT) {
+                    elementoUSDT.textContent = formatterBRL.format(cotacaoBRL_por_USDT);
+                }
+
+                document.getElementById('lastUpdated').textContent = `Última atualização: ${new Date().toLocaleTimeString('pt-BR')}`;
+
+            } catch (error) {
+                console.error("Erro CRÍTICO na API da Binance:", error);
+                document.getElementById('lastUpdated').textContent = `Erro na API! Detalhes no console. (${new Date().toLocaleTimeString('pt-BR')})`;
+            }
+        }
+
+        // --- Lógica PWA (Instalação como WebApp) ---
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+
+        // Escuta o evento do navegador que diz que o PWA pode ser instalado
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Torna o botão visível
+            installButton.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', (e) => {
+            installButton.style.display = 'none';
+            
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => {
+                    deferredPrompt = null;
+                });
             }
         });
 
-        // 4. Trata o USDT
-        const elementoUSDT = document.getElementById('USDT-BRL');
-        if(elementoUSDT) {
-            elementoUSDT.textContent = formatterBRL.format(cotacaoBRL_por_USDT);
+        // --- Inicialização ---
+        buscarCotacoesBinance();
+        setInterval(buscarCotacoesBinance, 60000); // Atualiza a cada 1 minuto
+
+        // --- Registro do Service Worker ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Certifique-se de que o arquivo 'service-worker.js' existe
+                navigator.serviceWorker.register('/service-worker.js');
+            });
         }
-
-        document.getElementById('lastUpdated').textContent = `Última atualização: ${new Date().toLocaleTimeString('pt-BR')}`;
-
-    } catch (error) {
-        console.error("Erro CRÍTICO na API da Binance:", error);
-        document.getElementById('lastUpdated').textContent = `Erro na API! Detalhes no console. (${new Date().toLocaleTimeString('pt-BR')})`;
-    }
-}
-
-// --- Lógica PWA e Inicialização (Mantida) ---
-
-let deferredPrompt;
-const installButton = document.getElementById('installButton');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installButton.style.display = 'block';
-});
-
-installButton.addEventListener('click', (e) => {
-    installButton.style.display = 'none';
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-            deferredPrompt = null;
-        });
-    }
-});
-
-buscarCotacoesBinance();
-setInterval(buscarCotacoesBinance, 60000); 
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js');
-    });
-}
     </script>
 </body>
 </html>
-
