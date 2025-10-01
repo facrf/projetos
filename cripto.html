@@ -3,181 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cotação de Criptomoedas</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Cotações Crypto em Tempo Real (Binance)</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1E293B"> 
+    
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        h1 {
-            color: #007bff;
+            background-color: #0F172A; /* Azul Escuro */
+            color: #E2E8F0; /* Cinza Claro */
+            margin: 0;
+            padding: 20px;
             text-align: center;
         }
-        #cotacoes {
-            background-color: #fff;
+
+        h1 {
+            color: #6366F1; /* Roxo */
+            margin-bottom: 5px;
+        }
+
+        #lastUpdated {
+            display: block;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #94A3B8;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1E293B;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         }
-        .moeda {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-        .moeda:last-child {
-            border-bottom: none;
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+            text-align: left;
         }
-        .nome {
+
+        th {
+            background-color: #334155;
+            color: #CBD5E1;
             font-weight: bold;
         }
+
         .valor {
-            color: #28a745; /* Verde para destaque */
+            text-align: right;
             font-weight: 600;
+            color: #A7F3D0; /* Verde Claro */
         }
+
+        /* Botão de Instalação (PWA) */
         #installButton {
-            display: none; /* Escondido por padrão, aparece se o navegador suportar instalação */
-            background-color: #00cc66;
-            color: white;
+            background-color: #FBBF24; /* Amarelo */
+            color: #1F2937;
             border: none;
             padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
+            margin-top: 30px;
             border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            /* Corrigido: o botão deve ser 'block' para aparecer, 
+               mas o JavaScript o esconde se a instalação não for possível. */
+            display: block; 
             width: 100%;
-            box-sizing: border-box;
+            transition: background-color 0.3s;
         }
-        .atualizacao {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 0.9em;
-            color: #6c757d;
+
+        #installButton:hover {
+            background-color: #F59E0B;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Cotações Crypto</h1>
+        <span id="lastUpdated">Carregando...</span>
 
-    <h1>Cotação de Criptomoedas (R$)</h1>
-
-    <div id="cotacoes">
-        <div class="moeda"><span class="nome">BTC/BRL</span> <span class="valor" id="BTC-BRL">Carregando...</span></div>
-        <div class="moeda"><span class="nome">ETH/BRL</span> <span class="valor" id="ETH-BRL">Carregando...</span></div>
-        <div class="moeda"><span class="nome">SOL/BRL</span> <span class="valor" id="SOL-BRL">Carregando...</span></div>
-        <div class="moeda"><span class="nome">XRP/BRL</span> <span class="valor" id="XRP-BRL">Carregando...</span></div>
-        <div class="moeda"><span class="nome">ADA/BRL</span> <span class="valor" id="ADA-BRL">Carregando...</span></div>
-        <div class="moeda"><span class="nome">XLM/BRL</span> <span class="valor" id="XLM-BRL">Carregando...</span></div>
-        <div class="moeda"><span class="nome">USDT/BRL</span> <span class="valor" id="USDT-BRL">Carregando...</span></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Moeda</th>
+                    <th style="text-align: right;">Cotação em BRL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Bitcoin (BTC)</td>
+                    <td id="BTC-BRL" class="valor">Buscando...</td>
+                </tr>
+                <tr>
+                    <td>Ethereum (ETH)</td>
+                    <td id="ETH-BRL" class="valor">Buscando...</td>
+                </tr>
+                <tr>
+                    <td>Solana (SOL)</td>
+                    <td id="SOL-BRL" class="valor">Buscando...</td>
+                </tr>
+                <tr>
+                    <td>Ripple (XRP)</td>
+                    <td id="XRP-BRL" class="valor">Buscando...</td>
+                </tr>
+                 <tr>
+                    <td>Cardano (ADA)</td>
+                    <td id="ADA-BRL" class="valor">Buscando...</td>
+                </tr>
+                 <tr>
+                    <td>Stellar (XLM)</td>
+                    <td id="XLM-BRL" class="valor">Buscando...</td>
+                </tr>
+                <tr>
+                    <td>Tether (USDT)</td>
+                    <td id="USDT-BRL" class="valor">Buscando...</td>
+                </tr>
+            </tbody>
+        </table>
         
-        <button id="installButton">Instalar como App</button>
-
-        <div class="atualizacao">Última atualização: <span id="lastUpdated">--:--:--</span></div>
+        <button id="installButton" style="display: none;">
+            Instalar como App
+        </button>
     </div>
 
     <script>
-        // Lista das moedas a serem buscadas na AwesomeAPI
-        const MOEDAS = 'BTC-BRL,ETH-BRL,SOL-BRL,XRP-BRL,ADA-BRL,XLM-BRL,USDT-BRL';
-        const API_URL = `https://economia.awesomeapi.com.br/json/last/${MOEDAS}`;
-        
-        // Formato para exibir os valores em Real Brasileiro
-        const formatter = new Intl.NumberFormat('pt-BR', {
+        // --- Configuração da API e Moedas ---
+        const PARES_CRIPTO = [
+            'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'XLMUSDT'
+        ];
+        const PAR_CONVERSAO = 'BRLUSDT'; 
+        const API_TICKER_BINANCE = 'https://api.binance.com/api/v3/ticker/24hr?symbols=';
+
+        const formatterBRL = new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL',
             minimumFractionDigits: 2
         });
 
-        async function buscarCotacoes() {
+        let cotacaoBRL_por_USDT = 0;
+
+        async function buscarCotacoesBinance() {
+            // ... (A função buscarCotacoesBinance permanece igual) ...
             try {
-                const response = await fetch(API_URL);
+                const simbolos = JSON.stringify([...PARES_CRIPTO, PAR_CONVERSAO].map(s => s));
+                const url = `${API_TICKER_BINANCE}${simbolos}`;
+                const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`Erro HTTP: ${response.status}`);
                 }
                 const data = await response.json();
+                
+                const parBRLUSDT = data.find(item => item.symbol === PAR_CONVERSAO);
+                
+                if (parBRLUSDT) {
+                    cotacaoBRL_por_USDT = 1 / parseFloat(parBRLUSDT.lastPrice);
+                } else {
+                    cotacaoBRL_por_USDT = 5.00; 
+                    console.warn("Falha ao obter cotação BRL/USDT. Usando 5.00 como fallback.");
+                }
+                
+                data.forEach(item => {
+                    if (PARES_CRIPTO.includes(item.symbol)) {
+                        const simbolo = item.symbol.replace('USDT', ''); 
+                        const precoUSD = parseFloat(item.lastPrice);
+                        const precoBRL = precoUSD * cotacaoBRL_por_USDT;
 
-                // Itera sobre as moedas e atualiza o DOM
-                // A chave da resposta é o código da moeda, ex: 'BTCBRL'
-                const moedasArray = MOEDAS.split(',');
-                moedasArray.forEach(pair => {
-                    const code = pair.replace('-', ''); // Ex: BTC-BRL -> BTCBRL
-                    const elementoId = pair;            // Ex: BTC-BRL
-                    const elementoValor = document.getElementById(elementoId);
-                    
-                    if (data[code] && elementoValor) {
-                        const valor = parseFloat(data[code].bid); // Pega o valor de compra ('bid')
-                        elementoValor.textContent = formatter.format(valor);
+                        const elementoId = `${simbolo}-BRL`;
+                        const elementoValor = document.getElementById(elementoId);
+                        
+                        if (elementoValor) {
+                            elementoValor.textContent = formatterBRL.format(precoBRL);
+                        }
                     }
                 });
 
-                // Atualiza o horário
-                const now = new Date();
-                document.getElementById('lastUpdated').textContent = now.toLocaleTimeString('pt-BR');
+                const elementoUSDT = document.getElementById('USDT-BRL');
+                if(elementoUSDT) {
+                    elementoUSDT.textContent = formatterBRL.format(cotacaoBRL_por_USDT);
+                }
+
+                document.getElementById('lastUpdated').textContent = `Última atualização: ${new Date().toLocaleTimeString('pt-BR')}`;
 
             } catch (error) {
-                console.error("Erro ao buscar cotações:", error);
-                document.getElementById('lastUpdated').textContent = `Erro! ${new Date().toLocaleTimeString('pt-BR')}`;
-                // Opcional: mostrar uma mensagem de erro na tela
+                console.error("Erro ao buscar cotações da Binance:", error);
+                document.getElementById('lastUpdated').textContent = `Erro na API! Tente novamente mais tarde.`;
             }
         }
 
-        // --- Lógica PWA (Instalação) ---
+        // --- Lógica PWA (Instalação como WebApp) ---
+
         let deferredPrompt;
         const installButton = document.getElementById('installButton');
 
+        // 1. Escuta o evento que o navegador dispara quando a página é elegível para PWA
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Previne que o navegador mostre o prompt padrão
             e.preventDefault();
-            // Salva o evento para ser acionado mais tarde
             deferredPrompt = e;
-            // Mostra o botão de instalação
+            // Torna o botão visível
             installButton.style.display = 'block';
         });
 
+        // 2. Aciona o prompt de instalação quando o botão é clicado
         installButton.addEventListener('click', (e) => {
-            // Esconde o botão novamente
             installButton.style.display = 'none';
-            // Mostra o prompt de instalação salvo
+            
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                // Espera o usuário responder ao prompt
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuário aceitou a instalação do PWA');
-                    } else {
-                        console.log('Usuário recusou a instalação do PWA');
-                    }
+                
+                deferredPrompt.userChoice.then(() => {
                     deferredPrompt = null;
                 });
             }
         });
 
-        // Chama a função imediatamente ao carregar
-        buscarCotacoes();
-        
-        // Atualiza a cada 60 segundos (1 minuto)
-        setInterval(buscarCotacoes, 60000); 
+        // --- Inicialização da Aplicação ---
+        buscarCotacoesBinance();
+        setInterval(buscarCotacoesBinance, 60000); 
 
-
-// --- Registro do Service Worker ---
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-                console.log('Service Worker registrado com sucesso:', registration.scope);
-            })
-            .catch(error => {
-                console.log('Falha no registro do Service Worker:', error);
+        // --- Registro do Service Worker ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js');
             });
-    });
-}
-
+        }
     </script>
 </body>
 </html>
